@@ -1,4 +1,34 @@
-# Vandermonde Polynomial Solver
+# Vandermonde Polynomial Interpolation & Extrapolation Framework
+
+## Overview
+
+A comprehensive scientific computing framework for polynomial interpolation and adaptive extrapolation using shifted and scaled Vandermonde matrices. This implementation provides numerical stability, extensive diagnostics, and professional-grade visualization.
+
+**Key Features:**
+- Shifted and scaled Vandermonde basis for numerical stability
+- Exact interpolation and least-squares fitting
+- Adaptive extrapolation with polynomial capping
+- Comprehensive numerical diagnostics
+- Publication-quality plots with Matplotlib
+- Interactive Jupyter widgets interface
+
+---
+
+## Table of Contents
+
+- [What is Polynomial Interpolation?](#what-is-polynomial-interpolation)
+- [The Vandermonde Matrix Method](#the-vandermonde-matrix-method)
+- [The Numerical Stability Problem](#the-numerical-stability-problem)
+- [Extrapolation Framework](#extrapolation-framework)
+- [Visualization Engine](#visualization-engine)
+- [Installation](#installation)
+- [Usage Guide](#usage-guide)
+- [API Reference](#api-reference)
+- [Examples](#examples)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
 
 ## What is Polynomial Interpolation?
 
@@ -159,71 +189,371 @@ We check the solution by:
 
 ---
 
-## Technical Implementation
+## Extrapolation Framework
 
-### Libraries Used
+The framework includes adaptive extrapolation with multiple methods:
 
-| Library | Purpose |
-|---------|---------|
-| `numpy` | Matrix operations, solving linear systems |
-| `ipywidgets` | Interactive UI elements |
-| `plotly` | Interactive plots |
-| `MathJax` | Display mathematical equations |
+### Extrapolation Methods
 
-### Key Functions
+| Method | Description | Best For |
+|--------|-------------|----------|
+| **Linear** | Uses last two points | Large extrapolation distances |
+| **Polynomial** | Uses interpolated polynomial | Small extrapolation distances |
+| **Rational** | Rational function approximation | Asymptotic behavior |
+| **Ensemble** | Blends multiple methods | Moderate extrapolation |
 
-**1. Vandermonde Matrix Construction**
-```python
-V = np.vander(X, increasing=True)
+### Method Selection Logic
+
+```
+Distance < 0.1x  → Polynomial blend (70% polynomial + 30% linear)
+Distance < 0.5x  → Ensemble (weighted average)
+Distance > 0.5x  → Linear-rational blend (70% linear + 30% rational)
 ```
 
-**2. Solving the System**
-```python
-coefficients = np.linalg.solve(V, Y)
-```
+### Reliability Scoring
 
-**3. Polynomial Evaluation**
-```python
-Y = np.polyval(coefficients, T)
 ```
-
-**4. Polynomial Expansion (Binomial Theorem)**
-```python
-for i, c in enumerate(coeffs):
-    for j in range(i + 1):
-        result[j] += c * comb(i,j) * ((-shift) ** (i - j))
+Reliability = 0.7 - 0.04 × Extrapolation Distance
+Score > 0.8  → HIGH reliability
+Score > 0.5  → MEDIUM reliability
+Score > 0.2  → LOW reliability
+Score < 0.2  → VERY LOW reliability
 ```
 
 ---
 
-## User Interface Guide
+## Visualization Engine
 
-### Buttons & Controls
+Publication-quality plots with Matplotlib:
 
-| Element | Purpose |
-|---------|---------|
-| **Number of Points** | Set how many data points (2-10) |
-| **Generate Table** | Create input table with that many rows |
-| **Shift Method** | Choose Mean/First/None for stability |
-| **Solve Polynomial** | Run the calculation and show results |
-| **Evaluate** | Test the polynomial at any T value |
+### Plot Types
 
-### Output Sections
+1. **Interpolation Plot**
+   - Data points with labels
+   - Interpolating polynomial
+   - Residual analysis
 
-| Section | Shows |
-|---------|-------|
-| **Step 1-2** | Assumed polynomial and equations |
-| **Step 3-4** | Vandermonde matrices |
-| **Step 5-6** | Shift and shifted matrix |
-| **Step 7-8** | Solution coefficients |
-| **Step 9-10** | Final polynomial |
-| **Step 11** | Verification table |
-| **Step 12** | Interactive evaluation |
-| **Plot** | Interactive graph |
+2. **Extrapolation Plot**
+   - Full range visualization
+   - Confidence intervals
+   - Method comparison
+
+3. **Reliability Gauge**
+   - Circular gauge display
+   - Reliability percentage
+   - Extrapolation distance
+
+4. **Comprehensive Analysis**
+   - Combined plots
+   - Method comparison table
+   - Residual analysis
+
+### Example Plots
+
+```python
+# Generate interpolation plot
+fig = interpolator.plot_interpolation()
+plt.show()
+
+# Generate extrapolation plot
+fig = interpolator.plot_extrapolation(x_target=33.31)
+plt.show()
+
+# Generate comprehensive plot
+fig = interpolator.plot_comprehensive(x_targets=[32.0, 33.31, 35.0])
+plt.show()
+```
 
 ---
 
-## Common Questions
+## Installation
+
+### Requirements
+
+```bash
+Python 3.8+
+numpy
+matplotlib
+ipywidgets
+jupyter
+```
+
+### Install from Source
+
+```bash
+git clone https://github.com/MrRogueKnight/Vandermonde-Polynomial-Solver.git
+cd Vandermonde-Polynomial-Solver
+pip install -r requirements.txt
+```
+
+### Quick Start in Jupyter
+
+```python
+from interpolation_framework import InterpolationApplication
+app = InterpolationApplication()
+```
+
+---
+
+## Usage Guide
+
+### Interactive Jupyter Application
+
+```python
+from interpolation_framework import InterpolationApplication
+app = InterpolationApplication()
+```
+
+The application provides:
+- Data input table with up to 10 points
+- Shift method selection (mean/first/none)
+- Least squares fitting option
+- Tabbed results display
+- Extrapolation with visualization
+- Method comparison
+
+### Programmatic Usage
+
+```python
+from interpolation_framework import ShiftedVandermondeInterpolator
+import numpy as np
+
+# Create interpolator
+interp = ShiftedVandermondeInterpolator()
+
+# Sample data
+x = np.array([30.75, 30.88, 31.00, 31.12])
+y = np.array([867.2295, 888.5687, 875.7651, 885.1544])
+
+# Interpolate
+result = interp.interpolate(x, y)
+
+# Evaluate at points
+y_pred = interp.evaluate(np.array([30.95, 31.05]))
+
+# Extrapolate
+extrap_result = interp.extrapolate(33.31)
+
+# Generate plots
+fig = interp.plot_interpolation()
+fig = interp.plot_extrapolation(33.31)
+```
+
+### Extrapolation Example
+
+```python
+from interpolation_framework import ShiftedVandermondeInterpolator
+
+interp = ShiftedVandermondeInterpolator()
+interp.interpolate(x, y)
+
+# Extrapolate at multiple points
+results = []
+for xt in [32.0, 33.31, 35.0]:
+    result = interp.extrapolate(xt)
+    results.append(result)
+    print(f"X = {xt:.2f}: Y = {result.y_predicted:.4f}")
+    print(f"Reliability: {result.reliability_score*100:.1f}%")
+    print(f"Method: {result.method_used}")
+```
+
+---
+
+## API Reference
+
+### `ShiftedVandermondeInterpolator`
+
+**Parameters:**
+- `shift_method` (ShiftMethod): MEAN, FIRST, or NONE
+- `scale_data` (bool): Apply scaling after shifting
+- `expansion_mode` (ExpansionMode): SHIFTED, EXPANDED, or BOTH
+
+**Methods:**
+- `interpolate(x_data, y_data)`: Exact interpolation
+- `fit(x_data, y_data, degree)`: Least squares fitting
+- `evaluate(x_values, use_shifted)`: Evaluate polynomial
+- `extrapolate(x_target)`: Adaptive extrapolation
+- `plot_interpolation(x_range, title)`: Generate interpolation plot
+- `plot_extrapolation(x_target, x_range, title)`: Generate extrapolation plot
+- `plot_comprehensive(x_targets, title)`: Generate comprehensive plot
+
+### `ExtrapolationResult`
+
+**Attributes:**
+- `x_target`: Target x value
+- `y_predicted`: Predicted y value
+- `method_used`: Extrapolation method
+- `method_predictions`: All method predictions
+- `reliability_score`: 0-1 reliability score
+- `reliability_level`: Categorical reliability
+- `extrapolation_distance`: Normalized distance
+- `confidence_interval`: 95% confidence interval
+- `warning`: Warning message if any
+
+### `InterpolationResult`
+
+**Attributes:**
+- `shifted_coefficients`: Coefficients in shifted basis
+- `expanded_coefficients`: Coefficients in original basis
+- `shift_value`: Shift value used
+- `scale_value`: Scale value used
+- `degree`: Polynomial degree
+- `diagnostics`: Numerical diagnostics
+- `verification`: Verification metrics
+
+---
+
+## Examples
+
+### Example 1: Basic Interpolation
+
+```python
+import numpy as np
+from interpolation_framework import ShiftedVandermondeInterpolator
+
+# Data
+x = np.array([30.75, 30.88, 31.00, 31.12])
+y = np.array([867.2295, 888.5687, 875.7651, 885.1544])
+
+# Interpolate
+interp = ShiftedVandermondeInterpolator()
+result = interp.interpolate(x, y)
+
+# Print polynomial
+print("Shifted Form:")
+print(interp.get_expanded())
+```
+
+### Example 2: Extrapolation with Visualization
+
+```python
+# Extrapolate
+result = interp.extrapolate(33.31)
+
+print(f"Prediction: {result.y_predicted:.6f}")
+print(f"Reliability: {result.reliability_score*100:.1f}%")
+print(f"Method: {result.method_used}")
+
+# Generate plot
+fig = interp.plot_extrapolation(33.31)
+plt.show()
+```
+
+### Example 3: Multiple Extrapolations
+
+```python
+x_targets = [32.0, 33.31, 35.0, 39.5]
+results = []
+
+for xt in x_targets:
+    result = interp.extrapolate(xt)
+    results.append(result)
+    print(f"X={xt:.2f}: Y={result.y_predicted:.4f} "
+          f"(Reliability: {result.reliability_score*100:.1f}%)")
+
+# Generate comprehensive plot
+fig = interp.plot_comprehensive(x_targets)
+plt.show()
+```
+
+### Example 4: Least Squares Fitting
+
+```python
+# Generate noisy data
+x = np.linspace(0, 10, 20)
+y = 2*x + 1 + 0.5*np.random.randn(20)
+
+# Fit with degree 1 (linear regression)
+interp = ShiftedVandermondeInterpolator()
+result = interp.fit(x, y, degree=1)
+
+print(f"R²: {result.verification.r_squared:.4f}")
+print(f"RMSE: {result.verification.rmse:.4f}")
+```
+
+---
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md).
+
+### Development Setup
+
+```bash
+git clone https://github.com/MrRogueKnight/Vandermonde-Polynomial-Solver.git
+cd Vandermonde-Polynomial-Solver
+pip install -e ".[dev]"
+pytest tests/
+```
+
+### Pull Request Process
+
+1. Fork the repository
+2. Create a feature branch
+3. Add your changes with tests
+4. Update documentation
+5. Submit pull request
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Acknowledgments
+
+- NumPy for linear algebra operations
+- Matplotlib for visualization
+- Jupyter for interactive computing
+
+---
+
+## Contact
+
+**Developer:** MrRogueKnight
+
+**GitHub:** [MrRogueKnight/Vandermonde-Polynomial-Solver](https://github.com/MrRogueKnight/Vandermonde-Polynomial-Solver)
+
+**Kaggle:** [View Notebook](https://www.kaggle.com/code/your-username/your-notebook)
+
+---
+
+## Citation
+
+If you use this framework in your research, please cite:
+
+```bibtex
+@software{VandermondeFramework2024,
+  author = {MrRogueKnight},
+  title = {Vandermonde Polynomial Interpolation and Extrapolation Framework},
+  year = {2024},
+  url = {https://github.com/MrRogueKnight/Vandermonde-Polynomial-Solver}
+}
+```
+
+---
+
+## Version History
+
+### v2.0.0 (Current)
+- Added adaptive extrapolation framework
+- Added visualization engine
+- Added confidence intervals
+- Added reliability scoring
+- Added method comparison
+- Added comprehensive diagnostics
+
+### v1.0.0
+- Initial release
+- Shifted Vandermonde interpolation
+- Numerical diagnostics
+- Basic evaluation
+
+---
+
+## FAQ
 
 ### Q: Why do we use shifting?
 **A:** To make the matrix well-conditioned when T values are large and close together. This prevents numerical errors.
@@ -232,7 +562,7 @@ for i, c in enumerate(coeffs):
 **A:** It measures how sensitive the solution is to small changes in input. Lower is better.
 
 ### Q: How many points can I use?
-**A:** 2 to 10 points. More points = higher degree polynomial.
+**A:** 2 to 10 points in the interactive UI. Programmatically, any number of points can be used.
 
 ### Q: Can I use any T values?
 **A:** Yes, but for best results use the "Mean" shift method when T values are large.
@@ -243,69 +573,8 @@ for i, c in enumerate(coeffs):
 ### Q: What is a "good" error?
 **A:** Error < 10⁻⁶ is good. Error < 10⁻¹⁰ is perfect (machine precision).
 
----
+### Q: How reliable are extrapolations?
+**A:** Reliability depends on distance from data. The framework provides quantitative reliability scores and confidence intervals.
 
-## Mathematical Summary
-
-### Full Process
-
-```
-Input: (T₁,Y₁), (T₂,Y₂), ..., (Tₙ,Yₙ)
-        ↓
-Apply shift: x = T - shift
-        ↓
-Build Vandermonde: V = [x⁰, x¹, x², ..., xⁿ⁻¹]
-        ↓
-Solve: V·a = Y → find coefficients a₀, a₁, ..., aₙ₋₁
-        ↓
-Expand using binomial theorem
-        ↓
-Output: P(T) = aₙTⁿ + aₙ₋₁Tⁿ⁻¹ + ... + a₁T + a₀
-        ↓
-Verify: Calculate Y at each T, check errors
-        ↓
-Evaluate: Test polynomial at any T value
-```
-
----
-
-## Example Walkthrough
-
-### Input
-```
-Points: 4
-T: [30.75, 30.88, 31.00, 31.12]
-Y: [867.2295, 888.5687, 875.7651, 885.1544]
-Shift Method: Mean
-```
-
-### Output (Final Polynomial)
-```
-P(T) = 5010.7141660891T³ - 465225.8306407345T² 
-       + 14398026.1783565581T - 148530098.2401689589
-```
-
-### Verification
-```
-Maximum Error: 6.19e-08 (very small!)
-Condition Number: 8.11e+02 (very stable!)
-Status: ✓ Good reconstruction
-```
-
-### Evaluation Example
-```
-At T = 30.95
-Y = 881.245672...
-```
-
----
-
-## Credits
-
-**Developed by:** MrRogueKnight
-
-**GitHub Repository:** [MrRogueKnight/Vandermonde-Polynomial-Solver](https://github.com/MrRogueKnight/Vandermonde-Polynomial-Solver)
-
-**Kaggle Notebook:** [View on Kaggle](https://www.kaggle.com/code/your-username/your-notebook)
-
----
+### Q: What methods are available for extrapolation?
+**A:** Linear, Polynomial, Rational, and Ensemble methods with automatic selection based on extrapolation distance.
